@@ -47,7 +47,7 @@ extern "C" {
  * @param drawLine function to draw line
  * @param drawTriangle function to draw triangle
  * @return created renderer
- * @note use TinyGL_DestroyRenderer to release window
+ * @note use `TinyGL_DestroyRenderer` to release window
  ********************************************************************************/
 tiny_renderer_t TinyGL_CreateRenderer(tiny_drawpixels_func* drawPixels, 
                                         tiny_drawlines_func* drawLines, 
@@ -55,8 +55,8 @@ tiny_renderer_t TinyGL_CreateRenderer(tiny_drawpixels_func* drawPixels,
 
 /*********************************************************************************
  * @brief create a renderer by dedefault
- * @param renderer created renderer 
- * @note use TinyGL_DestroyRenderer to release window
+ * @return created renderer 
+ * @note use `TinyGL_DestroyRenderer` to release window
  ********************************************************************************/
 tiny_renderer_t TinyGL_CreateDefaultRenderer();
 

@@ -7,7 +7,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 option(TINYGL_USE_DEFAULT "Use default renderer" on)
-option(TINYGL_BUILD_DEMO "Build Demo" off)
+option(TINYGL_BUILD_DEMO "Build Demo" on)
 
 if(WIN32)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")

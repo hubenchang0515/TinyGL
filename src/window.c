@@ -1,5 +1,5 @@
 #include <TinyGL/window.h>
-#include <glad/gl.h>
+#include <glad/gles2.h>
 #include <glfw/glfw3.h>
 #include <TinyGL/log.h>
 
@@ -9,7 +9,7 @@
  * @param width pixel width of window
  * @param height pixel height of window
  * @return created window
- * @note use TinyGL_DestroyWindow to release window
+ * @note use `TinyGL_DestroyWindow` to release window
  ********************************************************************************/
 tiny_window_t TinyGL_CreateWindow(const char* title, int width, int height)
 {
@@ -19,7 +19,7 @@ tiny_window_t TinyGL_CreateWindow(const char* title, int width, int height)
     }
     tiny_window_t window = (tiny_window_t)glfwCreateWindow(width, height, title, NULL, NULL);
     glfwMakeContextCurrent((GLFWwindow*)window);
-    if (gladLoadGL(glfwGetProcAddress) == 0)
+    if (gladLoadGLES2(glfwGetProcAddress) == 0)
     {
         TINYGL_LOG_ERROR("gladLoadGLLoader failed\n");
     }
@@ -115,7 +115,6 @@ void TinyGL_ClearWindow(tiny_window_t window)
 {
     TinyGL_SetCurrentWindow(window);
     glClearColor(0, 0, 0, 0xff);
-    glClearDepth(0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 

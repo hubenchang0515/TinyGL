@@ -16,7 +16,7 @@ extern "C" {
  * @param width pixel width of window
  * @param height pixel height of window
  * @return created window
- * @note use TinyGL_DestroyWindow to release window
+ * @note use `TinyGL_DestroyWindow` to release window
  ********************************************************************************/
 tiny_window_t TinyGL_CreateWindow(const char* title, int width, int height);
 

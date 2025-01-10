@@ -63,23 +63,32 @@ void drawTriangles(tiny_renderer_t renderer)
     TinyGL_DrawTriangles(renderer, 6, pixels, colors);
 }
 
+struct Userdata
+{
+    tiny_window_t window;
+    tiny_renderer_t renderer;
+};
+
+void loop(struct Userdata* args)
+{
+    TinyGL_ClearWindow(args->window);
+    drawPixels(args->renderer);
+    drawLines(args->renderer);
+    drawTriangles(args->renderer);
+    TinyGL_UpdateWindow(args->window);
+
+    if (TinyGL_WindowShouldClose(args->window))
+        TinyGL_StopLoop();
+}
+
 int main()
 {
     tiny_window_t window = TinyGL_CreateWindow("TinyGL", 640, 640);
     tiny_renderer_t renderer = TinyGL_CreateDefaultRenderer();
 
-    while (!TinyGL_WindowShouldClose(window))
-    {
-        if (TinyGL_GetKeyState(window, TINYGL_KEY_ESCAPE) == TINYGL_KEY_PRESS)
-        {
-            break;;
-        }
-        TinyGL_ClearWindow(window);
-        drawPixels(renderer);
-        drawLines(renderer);
-        drawTriangles(renderer);
-        TinyGL_UpdateWindow(window);
-    }
+    struct Userdata args = {window, renderer};
+
+    TinyGL_SetLoop((tiny_loop_func*)loop, (void*)&args);
 
     TinyGL_DestroyRenderer(renderer);
     TinyGL_DestroyWindow(window);

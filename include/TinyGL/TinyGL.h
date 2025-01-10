@@ -5,6 +5,7 @@
 #include <TinyGL/color.h>
 #include <TinyGL/key.h>
 #include <TinyGL/log.h>
+#include <TinyGL/loop.h>
 #include <TinyGL/renderer.h>
 #include <TinyGL/window.h>
 

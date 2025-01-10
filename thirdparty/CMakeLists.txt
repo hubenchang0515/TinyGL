@@ -1,4 +1,6 @@
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glfw")
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glfw")
+endif (NOT CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
 
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glad/cmake")
-glad_add_library(glad STATIC REPRODUCIBLE API gl:compatibility=4.0,gles1:common=1.0,gles2=3.0,glsc2=2.0 MERGE)
+glad_add_library(glad STATIC REPRODUCIBLE API gles2=3.0 MERGE)

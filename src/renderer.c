@@ -1,11 +1,11 @@
 #include <TinyGL/renderer.h>
 #include <TinyGL/log.h>
 #include <TinyGL/color.h>
-#include <glad/gl.h>
+#include <glad/gles2.h>
 #include <stdlib.h>
 
 static const char* TINYGL_DEFAULT_VERTEX_SHADER_SOURCE = 
-    "#version 330 core\n"
+    "#version 300 es\n"
     "layout (location = 0) in vec2 inPos;\n"
     "layout (location = 1) in vec4 inColor;\n"
     "uniform vec2 viewSize;\n"
@@ -17,7 +17,8 @@ static const char* TINYGL_DEFAULT_VERTEX_SHADER_SOURCE =
     "}\n";
 
 static const char* TINYGL_DEFAULT_FRAGMENT_SHADER_SOURCE = 
-    "#version 330 core\n"
+    "#version 300 es\n"
+    "precision mediump float;\n"
     "in vec4 vertexColor;\n"
     "out vec4 fragmentColor;\n"
     "void main()\n"
@@ -41,6 +42,15 @@ static void TinyGL_InitDefaultShader()
         TINYGL_LOG_DEBUG("TINYGL_DEFAULT_VERTEX_SHADER: %u\n", TINYGL_DEFAULT_VERTEX_SHADER);
         glShaderSource(TINYGL_DEFAULT_VERTEX_SHADER, 1, &TINYGL_DEFAULT_VERTEX_SHADER_SOURCE, NULL);
         glCompileShader(TINYGL_DEFAULT_VERTEX_SHADER);
+
+        int success;
+        glGetShaderiv(TINYGL_DEFAULT_VERTEX_SHADER, GL_COMPILE_STATUS, &success);
+        if (!success)
+        {
+            char info[1024];
+            glGetShaderInfoLog(TINYGL_DEFAULT_VERTEX_SHADER, 1024, NULL, info);
+            TINYGL_LOG_ERROR("%s\n", info);
+        }
     }
     
     if (TINYGL_DEFAULT_FRAGMENT_SHADER == 0)
@@ -49,6 +59,15 @@ static void TinyGL_InitDefaultShader()
         TINYGL_LOG_DEBUG("TINYGL_DEFAULT_FRAGMENT_SHADER: %u\n", TINYGL_DEFAULT_FRAGMENT_SHADER);
         glShaderSource(TINYGL_DEFAULT_FRAGMENT_SHADER, 1, &TINYGL_DEFAULT_FRAGMENT_SHADER_SOURCE, NULL);
         glCompileShader(TINYGL_DEFAULT_FRAGMENT_SHADER);
+
+        int success;
+        glGetShaderiv(TINYGL_DEFAULT_FRAGMENT_SHADER, GL_COMPILE_STATUS, &success);
+        if (!success)
+        {
+            char info[1024];
+            glGetShaderInfoLog(TINYGL_DEFAULT_FRAGMENT_SHADER, 1024, NULL, info);
+            TINYGL_LOG_ERROR("%s\n", info);
+        }
     }
     
     if (TINYGL_DEFAULT_SHADER_PROGRAME == 0)
@@ -58,7 +77,6 @@ static void TinyGL_InitDefaultShader()
         glAttachShader(TINYGL_DEFAULT_SHADER_PROGRAME, TINYGL_DEFAULT_VERTEX_SHADER);
         glAttachShader(TINYGL_DEFAULT_SHADER_PROGRAME, TINYGL_DEFAULT_FRAGMENT_SHADER);
         glLinkProgram(TINYGL_DEFAULT_SHADER_PROGRAME);
-        glUseProgram(TINYGL_DEFAULT_SHADER_PROGRAME);
 
         int success;
         glGetProgramiv(TINYGL_DEFAULT_SHADER_PROGRAME, GL_LINK_STATUS, &success);
@@ -67,6 +85,7 @@ static void TinyGL_InitDefaultShader()
             glGetProgramInfoLog(TINYGL_DEFAULT_SHADER_PROGRAME, 1024, NULL, info);
             TINYGL_LOG_ERROR("%s\n", info);
         }
+        glUseProgram(TINYGL_DEFAULT_SHADER_PROGRAME);
     }
 
     if (TINYGL_DEFAULT_VERTEX_BUFFER == 0)
@@ -233,13 +252,13 @@ struct TinyGL_Renderer
     tiny_drawtriangles_func* drawTriangles;
 };
 
-
 /*********************************************************************************
  * @brief create a renderer
  * @param drawPixel function to draw pixel
  * @param drawLine function to draw line
  * @param drawTriangle function to draw triangle
  * @return created renderer
+ * @note use `TinyGL_DestroyRenderer` to release window
  ********************************************************************************/
 tiny_renderer_t TinyGL_CreateRenderer(tiny_drawpixels_func* drawPixels, 
                                         tiny_drawlines_func* drawLines, 
@@ -254,7 +273,8 @@ tiny_renderer_t TinyGL_CreateRenderer(tiny_drawpixels_func* drawPixels,
 
 /*********************************************************************************
  * @brief create a renderer by dedefault
- * @param renderer created renderer 
+ * @return created renderer 
+ * @note use `TinyGL_DestroyRenderer` to release window
  ********************************************************************************/
 tiny_renderer_t TinyGL_CreateDefaultRenderer()
 {
