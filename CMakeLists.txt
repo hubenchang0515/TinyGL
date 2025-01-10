@@ -17,9 +17,9 @@ endif()
 
 add_subdirectory(thirdparty EXCLUDE_FROM_ALL)
 
-aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src TINYGL_SRC)
+aux_source_directory("${CMAKE_CURRENT_SOURCE_DIR}/src" TINYGL_SRC)
 add_library(${PROJECT_NAME} ${TINYGL_SRC})
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 target_link_libraries(${PROJECT_NAME} PUBLIC glfw glad)
 
 file(GLOB TINYGL_HDR "${CMAKE_CURRENT_SOURCE_DIR}/include/TinyGL/*.h")
@@ -30,7 +30,7 @@ if (TINYGL_USE_DEFAULT)
 endif (TINYGL_USE_DEFAULT)
 
 if (TINYGL_BUILD_DEMO)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/demo)
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/demo")
 endif (TINYGL_BUILD_DEMO)
 
 install(TARGETS ${PROJECT_NAME}
