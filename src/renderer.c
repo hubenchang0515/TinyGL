@@ -12,6 +12,7 @@ static const char* TINYGL_DEFAULT_VERTEX_SHADER_SOURCE =
     "out vec4 vertexColor;\n"
     "void main()\n"
     "{\n"
+    "   gl_PointSize = 1.0;\n"
     "   gl_Position = vec4(inPos[0]/viewSize[0]*2.0 - 1.0, 1.0 - inPos[1]/viewSize[1]*2.0, 1.0, 1.0);\n"
     "   vertexColor = inColor;\n"
     "}\n";
