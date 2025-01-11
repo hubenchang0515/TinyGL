@@ -5,13 +5,6 @@
 #include "color.h"
 
 typedef struct TinyGL_Renderer* tiny_renderer_t;
-typedef struct TinyGL_Position tiny_pos_t;
-
-struct TinyGL_Position
-{
-    int x;
-    int y;
-};
 
 /*********************************************************************************
  * @brief draw pixels
@@ -47,18 +40,18 @@ extern "C" {
  * @param drawLine function to draw line
  * @param drawTriangle function to draw triangle
  * @return created renderer
- * @note use `TinyGL_DestroyRenderer` to release window
+ * @note use `TinyGL_DestroyRenderer` to release renderer
  ********************************************************************************/
 tiny_renderer_t TinyGL_CreateRenderer(tiny_drawpixels_func* drawPixels, 
                                         tiny_drawlines_func* drawLines, 
                                         tiny_drawtriangles_func* drawTriangles);
 
 /*********************************************************************************
- * @brief create a renderer by dedefault
+ * @brief create a renderer by default 2D
  * @return created renderer 
- * @note use `TinyGL_DestroyRenderer` to release window
+ * @note use `TinyGL_DestroyRenderer` to release renderer
  ********************************************************************************/
-tiny_renderer_t TinyGL_CreateDefaultRenderer();
+tiny_renderer_t TinyGL_CreateDefault2DRenderer();
 
 /*********************************************************************************
  * @brief destroy a renderer

@@ -6,8 +6,9 @@ typedef enum TinyGL_Key tiny_key_t;
 
 enum TinyGL_KeyState
 {
-    TINYGL_KEY_PRESS = 1,
     TINYGL_KEY_RELEASE = 0,
+    TINYGL_KEY_PRESS = 1,
+    TINYGL_KEY_REPEAT = 2,
 };
 
 // https://www.glfw.org/docs/3.3/group__keys.html
