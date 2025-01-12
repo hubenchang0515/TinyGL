@@ -1,10 +1,24 @@
-#include <TinyGL/loop.h>
 #include <TinyGL/base.h>
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+TINYGL_EXPORT uint32_t NvOptimusEnablement = 1;
+TINYGL_EXPORT int AmdPowerXpressRequestHighPerformance = 1;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
 
 #ifdef __wasm
     #include <emscripten.h>
 #else
-    static bool _loop = false;
+    static bool private_looping = false;
 #endif // __wasm
 
 
@@ -13,15 +27,15 @@
  * @brief set main loop and run it
  * @param func function to loop
  * @param userdata userdata passed to func
- * @note use `TinyGL_StopLoop` to stop
+ * @note Can only be called in the main thread, use `TinyGL_StopLoop` to stop
  ********************************************************************************/
-void TinyGL_SetLoop(tiny_loop_func* func, void* userdata)
+void TinyGL_SetMainLoop(tiny_loop_func* func, void* userdata)
 {
 #ifdef __wasm
     emscripten_set_main_loop_arg(func, userdata, 0, true);
 #else
-    _loop = true;
-    while (_loop)
+    private_looping = true;
+    while (private_looping)
     {
         func(userdata);
     }
@@ -30,12 +44,13 @@ void TinyGL_SetLoop(tiny_loop_func* func, void* userdata)
 
 /*********************************************************************************
  * @brief stop main loop
+ * @note Can only be called in the main thread
  ********************************************************************************/
-void TinyGL_StopLoop(void)
+void TinyGL_StopMainLoop(void)
 {
 #ifdef __wasm
     emscripten_cancel_main_loop();
 #else
-    _loop = false;
+    private_looping = false;
 #endif
 }

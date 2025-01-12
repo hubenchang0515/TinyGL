@@ -60,6 +60,6 @@ void TinyGL_BindVertexArray(unsigned int array)
 void TinyGL_VertexAttribPointer(unsigned int array, unsigned int index, int size, tiny_datatype_t type, bool normalized, int stride, const void* pointer)
 {
     glBindVertexArray(array);
-    glVertexAttribPointer(index, size, TINYGL_DATA_TYPE_TO_GLES(type), normalized, stride, pointer);
+    glVertexAttribPointer(index, size, TINYGL_DATA_TYPE_TO_GLES(type), (GLboolean)normalized, stride, pointer);
     glEnableVertexAttribArray(index);   
 }

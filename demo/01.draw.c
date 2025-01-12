@@ -69,11 +69,6 @@ struct Userdata
     tiny_renderer_t renderer;
 };
 
-void keycallback(tiny_window_t window, tiny_key_t key, int scancode, tiny_keystate_t action, tiny_key_t mods)
-{
-    TINYGL_LOG_INFO("%d\n", key);
-}
-
 void loop(struct Userdata* args)
 {
     TinyGL_ClearWindow(args->window);
@@ -81,24 +76,29 @@ void loop(struct Userdata* args)
     drawLines(args->renderer);
     drawTriangles(args->renderer);
     TinyGL_UpdateWindow(args->window);
-    TinyGL_GetMousePos(args->window);
 
-    if (TinyGL_WindowShouldClose(args->window))
-        TinyGL_StopLoop();
-
-    if (TinyGL_GetKeyState(args->window, TINYGL_KEY_F11) == TINYGL_KEY_PRESS)
-        TinyGL_SetWindowFullScreen(args->window, !TinyGL_IsWindowFullScreen(args->window));
+    tiny_event_t event;
+    while (TinyGL_PollEvent(&event))
+    {
+        if (event.type == TINYGL_EVENT_TYPE_WINDOW_CLOSE)
+        {
+            TinyGL_StopMainLoop();
+        }
+        else if (TinyGL_CheckKeyEvent(&event, TINYGL_KEY_ENTER, TINYGL_KEY_MODIFIER_ALT, TINYGL_KEY_PRESS))
+        {
+            TinyGL_SetWindowFullScreen(args->window, !TinyGL_IsWindowFullScreen(args->window));
+        }
+    }
 }
 
 int main()
 {
     tiny_window_t window = TinyGL_CreateWindow("TinyGL", 640, 640);
     tiny_renderer_t renderer = TinyGL_CreateDefault2DRenderer();
-    TinyGL_SetKeyCallback(window, keycallback);
 
     struct Userdata args = {window, renderer};
 
-    TinyGL_SetLoop((tiny_loop_func*)loop, (void*)&args);
+    TinyGL_SetMainLoop((tiny_loop_func*)loop, (void*)&args);
 
     TinyGL_DestroyRenderer(renderer);
     TinyGL_DestroyWindow(window);

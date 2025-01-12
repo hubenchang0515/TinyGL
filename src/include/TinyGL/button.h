@@ -1,6 +1,10 @@
 #ifndef _BUTTON_H
 #define _BUTTON_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum TinyGL_MouseButtonState tiny_buttonstate_t;
 typedef enum TinyGL_MouseButton tiny_button_t;
 
@@ -25,5 +29,9 @@ enum TinyGL_MouseButton
     TINYGL_BUTTON_RIGHT = TINYGL_BUTTON_2,
     TINYGL_BUTTON_MIDDLE = TINYGL_BUTTON_3,
 };
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // _BUTTON_H

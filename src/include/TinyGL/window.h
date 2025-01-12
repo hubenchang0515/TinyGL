@@ -5,7 +5,17 @@
 #include "key.h"
 #include "button.h"
 
-typedef void* tiny_window_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct TinyGL_Window* tiny_window_t;
+
+/*********************************************************************************
+ * @brief window close callback
+ * @param window the window that received the event
+ ********************************************************************************/
+typedef void (tiny_windowclose_func) (tiny_window_t window);
 
 /*********************************************************************************
  * @brief window resize callback
@@ -13,21 +23,42 @@ typedef void* tiny_window_t;
  * @param width new width of window
  * @param height new height of window
  ********************************************************************************/
-typedef void(tiny_resize_func) (tiny_window_t *window, int width, int height);
+typedef void (tiny_windowresize_func) (tiny_window_t window, int width, int height);
 
 /*********************************************************************************
  * @brief key callback
  * @param window the window that received the event
  * @param key the keyboard key that was pressed or released
  * @param scancode the system-specific scancode of the key
- * @param action `TINYGL_KEY_PRESS` or `GLFW_RELEASE`
+ * @param action `TINYGL_KEY_PRESS` or `TINYGL_KEY_RELEASE`
  * @param mods which modifier keys were held down
  ********************************************************************************/
 typedef void (tiny_key_func) (tiny_window_t window, tiny_key_t key, int scancode, tiny_keystate_t action, tiny_key_t mods);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/*********************************************************************************
+ * @brief mouse button callback
+ * @param window the window that received the event
+ * @param button the mouse button that was pressed or released
+ * @param action `TINYGL_BUTTON_PRESS` or `TINYGL_BUTTON_RELEASE`
+ * @param mods which modifier keys were held down
+ ********************************************************************************/
+typedef void (tiny_mousebutton_func) (tiny_window_t window, int button, tiny_buttonstate_t action, int mods);
+
+/*********************************************************************************
+ * @brief mouse cursor move callback
+ * @param window the window that received the event
+ * @param x x position of mouse cursor
+ * @param y y position of mouse cursor
+ ********************************************************************************/
+typedef void (tiny_mousemove_func) (tiny_window_t window, float x, float y);
+
+/*********************************************************************************
+ * @brief mouse scroll callback
+ * @param window the window that received the event
+ * @param dx difference of x position
+ * @param dy difference of y position
+ ********************************************************************************/
+typedef void (tiny_mousescroll_func) (tiny_window_t window, float dx, float dy);
 
 /*********************************************************************************
  * @brief create a window
@@ -58,7 +89,7 @@ void TinyGL_GetWindowSize(tiny_window_t window, int* width, int* height);
 /*********************************************************************************
  * @brief destroy a window
  * @param window window to destroy
- * @note null unsafe
+ * @note null unsafe, must be called after `TinyGL_PollEvent` or `TinyGL_WaitEvent`
  ********************************************************************************/
 bool TinyGL_WindowShouldClose(tiny_window_t window);
 
@@ -117,11 +148,6 @@ tiny_window_t TinyGL_SetCurrentWindow(tiny_window_t window);
 void TinyGL_SwapBuffers(tiny_window_t window);
 
 /*********************************************************************************
- * @brief poll events
- ********************************************************************************/
-void TinyGL_PollEvents();
-
-/*********************************************************************************
  * @brief clear a window
  * @param window window to clear
  * @note null unsafe
@@ -129,7 +155,7 @@ void TinyGL_PollEvents();
 void TinyGL_ClearWindow(tiny_window_t window);
 
 /*********************************************************************************
- * @brief clear a window, swap buffers and poll events
+ * @brief clear a window, swap buffers
  * @param window window to clear
  * @note null unsafe
  ********************************************************************************/
@@ -178,7 +204,7 @@ void TinyGL_SetMousePos(tiny_window_t window, tiny_pos_t pos);
  * @note The default callback is set the viewport size to the window size. 
  * @note If you change the callback function, please set the viewport size yourself. 
  ********************************************************************************/
-tiny_resize_func* TinyGL_SetResizeCallback(tiny_window_t window, tiny_resize_func* fn);
+tiny_windowresize_func* TinyGL_SetResizeCallback(tiny_window_t window, tiny_windowresize_func* fn);
 
 /*********************************************************************************
  * @brief set callback of keyboard input

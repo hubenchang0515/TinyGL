@@ -1,6 +1,10 @@
 #ifndef _TINYGL_KEY_H
 #define _TINYGL_KEY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum TinyGL_KeyState tiny_keystate_t;
 typedef enum TinyGL_Key tiny_key_t;
 
@@ -255,5 +259,20 @@ enum TinyGL_Key
     TINYGL_KEY_MENU = 348,
 
 };
+
+// https://www.glfw.org/docs/3.3/group__mods.html
+enum TinyGL_KeyModifier
+{
+    TINYGL_KEY_MODIFIER_SHIFT = 0x0001,
+    TINYGL_KEY_MODIFIER_CTRL  = 0x0002,
+    TINYGL_KEY_MODIFIER_ALT   = 0x0004,
+    TINYGL_KEY_MODIFIER_META  = 0x0008,
+    // TINYGL_KEY_MODIFIER_CAPS_LOCK = 0x0010,
+    // TINYGL_KEY_MODIFIER_NUM_LOCK  = 0x0020,
+};
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // _TINYGL_KEY_H

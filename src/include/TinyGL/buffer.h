@@ -3,6 +3,10 @@
 
 #include "base.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum TinyGL_BufferType tiny_buffertype_t;
 typedef enum TinyGL_BufferUsage tiny_bufferusage_t;
 
@@ -24,10 +28,6 @@ enum TinyGL_BufferUsage
     // TINYGL_DYNAMIC_READ,
     // TINYGL_DYNAMIC_COPY,
 };
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*********************************************************************************
  * @brief create a buffer

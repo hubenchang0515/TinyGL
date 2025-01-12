@@ -29,6 +29,7 @@ static void TinyGL_InitDefaultShader()
     if (TINYGL_DEFAULT_FRAGMENT_SHADER == 0)
     {
         TINYGL_DEFAULT_FRAGMENT_SHADER = TinyGL_CreateShader(TINYGL_FRAGMENT_SHADER, (const char*)default_2d_fragment_shader_glsl, default_2d_fragment_shader_glsl_len);
+        TINYGL_LOG_DEBUG("TINYGL_DEFAULT_FRAGMENT_SHADER: %u\n", TINYGL_DEFAULT_FRAGMENT_SHADER);
     }
     
     if (TINYGL_DEFAULT_SHADER_PROGRAME == 0)
@@ -47,6 +48,7 @@ static void TinyGL_InitDefaultShader()
     {
         TINYGL_DEFAULT_VERTEX_ARRAY = TinyGL_CreateVertexArray();
         TINYGL_LOG_DEBUG("TINYGL_DEFAULT_VERTEX_ARRAY: %u\n", TINYGL_DEFAULT_VERTEX_ARRAY);
+        TinyGL_BindVertexArray(TINYGL_DEFAULT_VERTEX_ARRAY);
     }
     
     if (TINYGL_DEFAULT_INDEX_BUFFER == 0)
@@ -126,13 +128,11 @@ static void TinyGL_DefaultDrawLines(unsigned int n, const tiny_pos_t* pixels, co
         indices[i] = i;
     }
 
-    glBufferData(GL_ARRAY_BUFFER, vbufsize, vertices, GL_STREAM_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibufsize, indices, GL_STATIC_DRAW);
+    TinyGL_SetBufferData(TINYGL_ARRAY_BUFFER, TINYGL_DEFAULT_VERTEX_BUFFER, vbufsize, vertices, TINYGL_STREAM_DRAW);
+    TinyGL_SetBufferData(TINYGL_ELEMENT_ARRAY_BUFFER, TINYGL_DEFAULT_INDEX_BUFFER, ibufsize, indices, TINYGL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, vsize, (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, false, vsize, (void*)(sizeof(float) * 2));
-    glEnableVertexAttribArray(1);
+    TinyGL_VertexAttribPointer(TINYGL_DEFAULT_VERTEX_ARRAY, 0, 2, TINYGL_FLOAT, false, vsize, (void*)0);
+    TinyGL_VertexAttribPointer(TINYGL_DEFAULT_VERTEX_ARRAY, 1, 4, TINYGL_FLOAT, false, vsize, (void*)(sizeof(float) * 2));
 
     GLfloat viewport[4];
     glGetFloatv(GL_VIEWPORT, viewport);
@@ -171,13 +171,11 @@ static void TinyGL_DefaultDrawTriangles(unsigned int n, const tiny_pos_t* pixels
         indices[i] = i;
     }
 
-    glBufferData(GL_ARRAY_BUFFER, vbufsize, vertices, GL_STREAM_DRAW);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ibufsize, indices, GL_STATIC_DRAW);
+    TinyGL_SetBufferData(TINYGL_ARRAY_BUFFER, TINYGL_DEFAULT_VERTEX_BUFFER, vbufsize, vertices, TINYGL_STREAM_DRAW);
+    TinyGL_SetBufferData(TINYGL_ELEMENT_ARRAY_BUFFER, TINYGL_DEFAULT_INDEX_BUFFER, ibufsize, indices, TINYGL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, false, vsize, (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 4, GL_FLOAT, false, vsize, (void*)(sizeof(float) * 2));
-    glEnableVertexAttribArray(1);
+    TinyGL_VertexAttribPointer(TINYGL_DEFAULT_VERTEX_ARRAY, 0, 2, TINYGL_FLOAT, false, vsize, (void*)0);
+    TinyGL_VertexAttribPointer(TINYGL_DEFAULT_VERTEX_ARRAY, 1, 4, TINYGL_FLOAT, false, vsize, (void*)(sizeof(float) * 2));
 
     GLfloat viewport[4];
     glGetFloatv(GL_VIEWPORT, viewport);

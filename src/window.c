@@ -1,26 +1,128 @@
 #include <TinyGL/window.h>
+#include <TinyGL/event.h>
 #include <glad/gles2.h>
 #include <glfw/glfw3.h>
 #include <TinyGL/log.h>
 #include <stdlib.h>
 
-struct TinyGL_PrivateWindowUserData
+struct TinyGL_Window
 {
-    int x;
-    int y;
-    int width;
-    int height;
+    GLFWwindow* window;
+
     bool fullscreen;
-    void* userdata;
+    int x;          // before fullscreen
+    int y;          // before fullscreen
+    int width;      // before fullscreen
+    int height;     // before fullscreen
+
+    tiny_windowclose_func* closeCallback;
+    tiny_windowresize_func* resizeCallback;
+    tiny_key_func* keyCallback;
+    tiny_mousebutton_func* mouseButtonCallback;
+    tiny_mousemove_func* mouseMoveCallback;
+    tiny_mousescroll_func* mouseScrollCallback;
+    // TODO: 补充其他回调
 };
 
-
-static void default_resize_callback(tiny_window_t *window, int width, int height)
+static void private_windowclose_func(GLFWwindow* window)
 {
-    if (TinyGL_GetCurrentWindow() == window)
+    TINYGL_LOG_DEBUG("[WINDOW CLOSE] window:%p\n", window);
+
+    tiny_window_t w = glfwGetWindowUserPointer(window);
+    if (w->closeCallback)
+        w->closeCallback(w);
+
+    tiny_event_t event;
+    event.type = TINYGL_EVENT_TYPE_WINDOW_CLOSE;
+    event.windowCloseEvent.window = w;
+    TinyGL_PushEvent(&event);
+}
+
+static void private_windowresize_callback(GLFWwindow* window, int width, int height)
+{
+    TINYGL_LOG_DEBUG("[WINDOW RESIZE] window:%p width:%d height:%d\n", window, width, height);
+    if (glfwGetCurrentContext() == window)
     {
         glViewport(0, 0, width, height);
     }
+
+    tiny_window_t w = glfwGetWindowUserPointer(window);
+    if (w->resizeCallback)
+        w->resizeCallback(w, width, height);
+
+    tiny_event_t event;
+    event.type = TINYGL_EVENT_TYPE_WINDOW_RESIZE;
+    event.windowResizeEvent.window = w;
+    event.windowResizeEvent.width = width;
+    event.windowResizeEvent.height = height;
+    TinyGL_PushEvent(&event);
+}
+
+static void private_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    TINYGL_LOG_DEBUG("[KEY] window:%p key:%d scancode:%d action:%d mods:%d\n", window, key, scancode, action, mods);
+
+    tiny_window_t w = glfwGetWindowUserPointer(window);
+    if (w->keyCallback)
+        w->keyCallback(w, (tiny_key_t)key, scancode, action, mods);
+
+    tiny_event_t event;
+    event.type = TINYGL_EVENT_TYPE_KEY;
+    event.keyEvent.window = w;
+    event.keyEvent.key = key;
+    event.keyEvent.scancode = scancode;
+    event.keyEvent.action = action;
+    event.keyEvent.mods = mods;
+    TinyGL_PushEvent(&event);
+}
+
+static void private_mousebutton_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    TINYGL_LOG_DEBUG("[MOUSE BUTTON] window:%p button:%d action:%d mods:%d\n", window, button, action, mods);
+
+    tiny_window_t w = glfwGetWindowUserPointer(window);
+    if (w->mouseButtonCallback)
+        w->mouseButtonCallback(w, (tiny_button_t)button, action, mods);
+
+    tiny_event_t event;
+    event.type = TINYGL_EVENT_TYPE_MOUSE_BUTTON;
+    event.mouseButtonEvent.window = w;
+    event.mouseButtonEvent.button = button;
+    event.mouseButtonEvent.action = action;
+    event.mouseButtonEvent.mods = mods;
+    TinyGL_PushEvent(&event);
+}
+
+static void private_mousemove_callback(GLFWwindow* window, double x, double y)
+{
+    TINYGL_LOG_DEBUG("[MOUSE MOVE] window:%p x:%f y:%f\n", window, x, y);
+
+    tiny_window_t w = glfwGetWindowUserPointer(window);
+    if (w->mouseMoveCallback)
+        w->mouseMoveCallback(w, (float)x, (float)y);
+    
+    tiny_event_t event;
+    event.type = TINYGL_EVENT_TYPE_MOUSE_MOVE;
+    event.mouseMoveEvent.window = w;
+    event.mouseMoveEvent.x = x;
+    event.mouseMoveEvent.y = y;
+    TinyGL_PushEvent(&event);
+}
+
+static void private_mousescroll_callback(GLFWwindow* window, double dx, double dy)
+{
+    TINYGL_LOG_DEBUG("[MOUSE SCROLL] window:%p dx:%f dy:%f\n", window, dx, dy);
+
+    tiny_window_t w = glfwGetWindowUserPointer(window);
+    if (w->mouseScrollCallback)
+        w->mouseScrollCallback(w, (float)dx, (float)dy);
+
+    tiny_event_t event;
+    event.type = TINYGL_EVENT_TYPE_MOUSE_MOVE;
+    event.mouseScrollEvent.window = w;
+    event.mouseScrollEvent.dx = dx;
+    event.mouseScrollEvent.dy = dy;
+    TinyGL_PushEvent(&event);
 }
 
 /*********************************************************************************
@@ -37,20 +139,32 @@ tiny_window_t TinyGL_CreateWindow(const char* title, int width, int height)
     {
         TINYGL_LOG_ERROR("glfwInit failed\n");
     }
-    tiny_window_t window = (tiny_window_t)glfwCreateWindow(width, height, title, NULL, NULL);
-    glfwMakeContextCurrent((GLFWwindow*)window);
+
+    tiny_window_t window = malloc(sizeof(struct TinyGL_Window));
+    window->window = glfwCreateWindow(width, height, title, NULL, NULL);
+    window->fullscreen = false;
+    window->closeCallback = NULL;
+    window->resizeCallback = NULL;
+    window->keyCallback = NULL;
+    window->mouseButtonCallback = NULL;
+    window->mouseMoveCallback = NULL;
+    window->mouseScrollCallback = NULL;
+    glfwGetWindowPos(window->window, &window->x, &window->y);
+    glfwGetWindowSize(window->window, &window->width, &window->height);
+    glfwSetWindowUserPointer(window->window, window);
+
+    glfwMakeContextCurrent(window->window);
     if (gladLoadGLES2(glfwGetProcAddress) == 0)
     {
         TINYGL_LOG_ERROR("gladLoadGLLoader failed\n");
     }
-    struct TinyGL_PrivateWindowUserData* data = malloc(sizeof(struct TinyGL_PrivateWindowUserData));
-    glfwGetWindowPos((GLFWwindow*)window, &data->x, &data->y);
-    glfwGetWindowSize((GLFWwindow*)window, &data->width, &data->height);
-    data->fullscreen = false;
-    data->userdata = NULL;
-    glfwSetWindowUserPointer((GLFWwindow*)window, data);
 
-    TinyGL_SetResizeCallback(window, default_resize_callback);
+    glfwSetWindowCloseCallback(window->window, private_windowclose_func);
+    glfwSetFramebufferSizeCallback(window->window, private_windowresize_callback);
+    glfwSetKeyCallback(window->window, private_key_callback);
+    glfwSetMouseButtonCallback(window->window, private_mousebutton_callback);
+    glfwSetCursorPosCallback(window->window, private_mousemove_callback);
+    glfwSetScrollCallback(window->window, private_mousescroll_callback);
     return window;
 }
 
@@ -61,12 +175,8 @@ tiny_window_t TinyGL_CreateWindow(const char* title, int width, int height)
  ********************************************************************************/
 void TinyGL_DestroyWindow(tiny_window_t window)
 {
-    void* data = glfwGetWindowUserPointer((GLFWwindow*)window);
-    if (data != NULL)
-    {
-        free(data);
-    }
-    glfwDestroyWindow((GLFWwindow*)window);
+    glfwDestroyWindow(window->window);
+    free(window);
 }
 
 /*********************************************************************************
@@ -78,17 +188,17 @@ void TinyGL_DestroyWindow(tiny_window_t window)
  ********************************************************************************/
 void TinyGL_GetWindowSize(tiny_window_t window, int* width, int* height)
 {
-    glfwGetWindowSize((GLFWwindow*)window, width, height);
+    glfwGetWindowSize(window->window, width, height);
 }
 
 /*********************************************************************************
  * @brief destroy a window
  * @param window window to destroy
- * @note null unsafe
+ * @note null unsafe, must be called after `TinyGL_PollEvent` or `TinyGL_WaitEvent`
  ********************************************************************************/
 bool TinyGL_WindowShouldClose(tiny_window_t window)
 {
-    return glfwWindowShouldClose((GLFWwindow*)window);
+    return glfwWindowShouldClose(window->window);
 }
 
 /*********************************************************************************
@@ -112,7 +222,7 @@ void TinyGL_SetWindowViewSize(tiny_window_t window)
  ********************************************************************************/
 void TinyGL_SetWindowSize(tiny_window_t window, int width, int height)
 {
-    glfwSetWindowSize((GLFWwindow*)window, width, height);
+    glfwSetWindowSize(window->window, width, height);
 }
 
 /*********************************************************************************
@@ -126,19 +236,18 @@ void TinyGL_SetWindowFullScreen(tiny_window_t window, bool fullscreen)
 {
     if (fullscreen)
     {
-        struct TinyGL_PrivateWindowUserData* data = glfwGetWindowUserPointer((GLFWwindow*)window);
-        glfwGetWindowPos((GLFWwindow*)window, &data->x, &data->y);
-        glfwGetWindowSize((GLFWwindow*)window, &data->width, &data->height);
+        struct TinyGL_PrivateWindowUserData* data = glfwGetWindowUserPointer(window->window);
+        glfwGetWindowPos(window->window, &window->x, &window->y);
+        glfwGetWindowSize(window->window, &window->width, &window->height);
         GLFWmonitor* primary = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(primary);
-        glfwSetWindowMonitor((GLFWwindow*)window, primary, 0, 0, mode->width, mode->height, mode->refreshRate);
-        data->fullscreen = true;
+        glfwSetWindowMonitor(window->window, primary, 0, 0, mode->width, mode->height, mode->refreshRate);
+        window->fullscreen = true;
     }
     else
     {
-        struct TinyGL_PrivateWindowUserData* data = glfwGetWindowUserPointer((GLFWwindow*)window);
-        glfwSetWindowMonitor((GLFWwindow*)window, NULL, data->x, data->y, data->width, data->height, GLFW_DONT_CARE);
-        data->fullscreen = false;
+        glfwSetWindowMonitor(window->window, NULL, window->x, window->y, window->width, window->height, GLFW_DONT_CARE);
+        window->fullscreen = false;
     }
     
 }
@@ -151,8 +260,7 @@ void TinyGL_SetWindowFullScreen(tiny_window_t window, bool fullscreen)
  ********************************************************************************/
 bool TinyGL_IsWindowFullScreen(tiny_window_t window)
 {
-    struct TinyGL_PrivateWindowUserData* data = glfwGetWindowUserPointer((GLFWwindow*)window);
-    return data->fullscreen;
+    return window->fullscreen;
 }
 
 /*********************************************************************************
@@ -178,7 +286,7 @@ tiny_window_t TinyGL_SetCurrentWindow(tiny_window_t window)
         return prev;
     }
 
-    glfwMakeContextCurrent((GLFWwindow*)window);
+    glfwMakeContextCurrent(window->window);
     TinyGL_SetWindowViewSize(window);
     return prev;
 }
@@ -190,15 +298,7 @@ tiny_window_t TinyGL_SetCurrentWindow(tiny_window_t window)
  ********************************************************************************/
 void TinyGL_SwapBuffers(tiny_window_t window)
 {
-    glfwSwapBuffers((GLFWwindow*)window);
-}
-
-/*********************************************************************************
- * @brief poll events
- ********************************************************************************/
-void TinyGL_PollEvents()
-{
-    glfwPollEvents();
+    glfwSwapBuffers(window->window);
 }
 
 /*********************************************************************************
@@ -214,14 +314,13 @@ void TinyGL_ClearWindow(tiny_window_t window)
 }
 
 /*********************************************************************************
- * @brief update a window, swap buffers and poll events
+ * @brief update a window, swap buffers
  * @param window window to update
  * @note null unsafe
  ********************************************************************************/
 void TinyGL_UpdateWindow(tiny_window_t window)
 {
     TinyGL_SwapBuffers(window);
-    TinyGL_PollEvents();
 }
 
 /*********************************************************************************
@@ -233,7 +332,7 @@ void TinyGL_UpdateWindow(tiny_window_t window)
  ********************************************************************************/
 tiny_keystate_t TinyGL_GetKeyState(tiny_window_t window, tiny_key_t key)
 {
-    return glfwGetKey((GLFWwindow*)window, (int)key);
+    return glfwGetKey(window->window, (int)key);
 }
 
 /*********************************************************************************
@@ -245,7 +344,7 @@ tiny_keystate_t TinyGL_GetKeyState(tiny_window_t window, tiny_key_t key)
  ********************************************************************************/
 tiny_buttonstate_t TinyGL_GetMouseButtonState(tiny_window_t window, tiny_button_t button)
 {
-    return glfwGetMouseButton((GLFWwindow*)window, (int)button);
+    return glfwGetMouseButton(window->window, (int)button);
 }
 
 /*********************************************************************************
@@ -257,7 +356,7 @@ tiny_buttonstate_t TinyGL_GetMouseButtonState(tiny_window_t window, tiny_button_
 tiny_pos_t TinyGL_GetMousePos(tiny_window_t window)
 {
     double x, y;
-    glfwGetCursorPos((GLFWwindow*)window, &x, &y);
+    glfwGetCursorPos(window->window, &x, &y);
     return (tiny_pos_t){(int)x, (int)y};
 }
 
@@ -269,7 +368,7 @@ tiny_pos_t TinyGL_GetMousePos(tiny_window_t window)
  ********************************************************************************/
 void TinyGL_SetMousePos(tiny_window_t window, tiny_pos_t pos)
 {
-    glfwSetCursorPos((GLFWwindow*)window, (double)pos.x, (double)pos.y);
+    glfwSetCursorPos(window->window, (double)pos.x, (double)pos.y);
 }
 
 /*********************************************************************************
@@ -279,9 +378,11 @@ void TinyGL_SetMousePos(tiny_window_t window, tiny_pos_t pos)
  * @return previous callback
  * @note window is null unsafe
  ********************************************************************************/
-tiny_resize_func* TinyGL_SetResizeCallback(tiny_window_t window, tiny_resize_func* fn)
+tiny_windowresize_func* TinyGL_SetResizeCallback(tiny_window_t window, tiny_windowresize_func* fn)
 {
-    return (tiny_resize_func*)glfwSetFramebufferSizeCallback((GLFWwindow*)window, (GLFWframebuffersizefun)fn);
+    tiny_windowresize_func* prev = window->resizeCallback;
+    window->resizeCallback = fn;
+    return prev;
 }
 
 /*********************************************************************************
@@ -293,5 +394,5 @@ tiny_resize_func* TinyGL_SetResizeCallback(tiny_window_t window, tiny_resize_fun
  ********************************************************************************/
 tiny_key_func* TinyGL_SetKeyCallback(tiny_window_t window, tiny_key_func* fn)
 {
-    return (tiny_key_func*)glfwSetKeyCallback((GLFWwindow*)window, (GLFWkeyfun)fn);
+    return (tiny_key_func*)glfwSetKeyCallback(window->window, (GLFWkeyfun)fn);
 }

@@ -4,6 +4,10 @@
 #include "base.h"
 #include "color.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct TinyGL_Renderer* tiny_renderer_t;
 
 /*********************************************************************************
@@ -29,10 +33,6 @@ typedef void (tiny_drawlines_func)(unsigned int n, const tiny_pos_t* pixels, con
  * @param colors color of pixels
  ********************************************************************************/
 typedef void (tiny_drawtriangles_func)(unsigned int n, const tiny_pos_t* pixels, const tiny_color_t* colors);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*********************************************************************************
  * @brief create a renderer

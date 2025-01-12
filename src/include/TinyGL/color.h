@@ -3,6 +3,10 @@
 
 #include "base.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint32_t tiny_color_t; // ARGB
 
 #define TINYGL_COLOR_RGBA(R, G, B, A) ((tiny_color_t)((((tiny_color_t)(R)) << 16) | (((tiny_color_t)(G)) << 8) | ((tiny_color_t)(B)) | (((tiny_color_t)(A)) << 24)))
@@ -15,6 +19,8 @@ typedef uint32_t tiny_color_t; // ARGB
 #define TINYGL_COLOR_GET_GREEN(COLOR) ((((tiny_color_t)(COLOR)) >> 8) & 0xff)
 #define TINYGL_COLOR_GET_BLUE(COLOR) ((((tiny_color_t)(COLOR))) & 0xff)
 
-#define T
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #endif // _TINYGL_COLOR_H

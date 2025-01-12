@@ -3,6 +3,10 @@
 
 #include "base.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum TinyGL_ShaderType tiny_shadertype_t;
 
 enum TinyGL_ShaderType
@@ -12,9 +16,6 @@ enum TinyGL_ShaderType
     TINYGL_FRAGMENT_SHADER,
 };
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /*********************************************************************************
  * @brief create a shader

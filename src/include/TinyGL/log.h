@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 
-
 // Log Tag
 #ifdef __linux__
     #define TINYGL_LOG_TAG_VERBOSE  "\033[97;1mVERBOSE\033[0m"
@@ -30,7 +29,11 @@
 
 // Default LOG_LEVEL
 #ifndef TINYGL_LOG_LEVEL
-    #define TINYGL_LOG_LEVEL TINYGL_LOG_LEVEL_INFO
+    #ifndef NDEBUG 
+        #define TINYGL_LOG_LEVEL TINYGL_LOG_LEVEL_DEBUG
+    #else
+        #define TINYGL_LOG_LEVEL TINYGL_LOG_LEVEL_INFO
+    #endif // NDEBUG
 #endif // LOG_LEVEL
 
 
